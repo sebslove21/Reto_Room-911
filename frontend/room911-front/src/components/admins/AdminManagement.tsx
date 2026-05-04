@@ -310,6 +310,14 @@ function AdminFormModal({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+
+    // Validar email
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+    if (!emailRegex.test(form.email.trim())) {
+      toast.error('Email inválido')
+      return
+    }
+
     if (!admin && form.password !== form.confirmPwd) {
       setPwdError('Las contraseñas no coinciden'); return
     }

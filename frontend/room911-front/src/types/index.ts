@@ -115,7 +115,7 @@ export interface EmployeePresence {
 }
 
 export interface RoomStatus {
-  currentCapacity: number
+  currentOccupancy: number
   maxCapacity: number
   maxStayMinutes: number
   alertThresholdPct: number

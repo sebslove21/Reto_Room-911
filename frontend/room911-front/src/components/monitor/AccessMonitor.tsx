@@ -126,8 +126,12 @@ export function AccessMonitor() {
     },
   })
 
-  const occupancyPct = status
-    ? Math.round((status.currentCapacity / status.maxCapacity) * 100)
+  const currentOccupancy = status
+    ? status.currentOccupancy ?? status.employeesInside.length
+    : 0
+
+  const occupancyPct = status && status.maxCapacity > 0
+    ? Math.round((currentOccupancy / status.maxCapacity) * 100)
     : 0
   const barColor = occupancyPct >= 80 ? '#d32f2f'
     : occupancyPct >= 60 ? '#f57c00' : '#2e7d32'
@@ -215,7 +219,7 @@ export function AccessMonitor() {
                 <div style={{
                   fontSize: 24, fontWeight: 800, color: '#1a1d29',
                 }}>
-                  {status.currentCapacity}
+                  {currentOccupancy}
                   <span style={{
                     fontSize: 14, color: '#546e7a', fontWeight: 400,
                   }}>

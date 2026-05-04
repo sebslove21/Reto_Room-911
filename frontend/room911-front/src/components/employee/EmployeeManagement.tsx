@@ -886,6 +886,21 @@ function EmployeeFormModal({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+
+    // Validar ID interno
+    const empRegex = /^EMP-\d{3}$/
+    if (!empRegex.test(form.internalId.trim())) {
+      toast.error('ID Interno debe tener formato EMP-XXX (ej: EMP-001)')
+      return
+    }
+
+    // Validar email
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+    if (form.email && !emailRegex.test(form.email.trim())) {
+      toast.error('Email inválido')
+      return
+    }
+
     setLoading(true)
     try {
       if (employee) {

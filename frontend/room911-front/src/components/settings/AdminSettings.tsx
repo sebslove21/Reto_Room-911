@@ -66,6 +66,14 @@ function ProfileTab() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+
+    // Validar email
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+    if (!emailRegex.test(form.email.trim())) {
+      toast.error('Email inválido')
+      return
+    }
+
     setLoading(true)
     try {
       await profileApi.update(form)

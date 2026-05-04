@@ -21,6 +21,14 @@ export function AccessScanner({ standalone }: Props) {
   const handleScan = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!internalId.trim()) return
+
+    // Validar formato EMP-XXX
+    const empRegex = /^EMP-\d{3}$/
+    if (!empRegex.test(internalId.trim())) {
+      toast.error('Formato inválido. Use EMP-XXX (ej: EMP-001)')
+      return
+    }
+
     setLoading(true)
     setLastLog(null)
     try {
