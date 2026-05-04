@@ -3,7 +3,6 @@ package room911_project.model;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.UpdateTimestamp;
-
 import java.time.OffsetDateTime;
 
 @Entity

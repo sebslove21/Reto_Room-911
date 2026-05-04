@@ -1,5 +1,5 @@
 import api from './axios';
-import type { Employee, CreateEmployeeRequest, Page } from '../components/types';
+import type { Employee, CreateEmployeeRequest, Page } from '../types';
 
 export const employeesApi = {
   getAll: (params: {

@@ -5,13 +5,12 @@ import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
-
 import java.time.OffsetDateTime;
 import java.util.UUID;
 
 @Entity
 @Table(name = "admins")
-@Getter @Setter @NoArgsConstructor @AllArgsConstructor @Builder
+@Getter @Setter @NoArgsConstructor @AllArgsConstructor
 public class Admin {
 
     @Id
@@ -35,7 +34,7 @@ public class Admin {
     @Column(name = "role", nullable = false)
     private AdminRole role = AdminRole.ROLE_ADMIN;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "department_id")
     private Department department;
 

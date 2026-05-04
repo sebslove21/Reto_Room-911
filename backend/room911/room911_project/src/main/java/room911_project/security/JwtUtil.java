@@ -5,7 +5,6 @@ import io.jsonwebtoken.security.Keys;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
-
 import javax.crypto.SecretKey;
 import java.util.Date;
 import java.util.HashMap;
@@ -41,10 +40,6 @@ public class JwtUtil {
         return getClaims(token).getSubject();
     }
 
-    public String extractRole(String token) {
-        return (String) getClaims(token).get("role");
-    }
-
     public boolean isTokenValid(String token, UserDetails userDetails) {
         try {
             String email = extractEmail(token);
@@ -60,9 +55,9 @@ public class JwtUtil {
 
     private Claims getClaims(String token) {
         return Jwts.parser()
-                .verifyWith(getSigningKey())
+                .setSigningKey(getSigningKey())
                 .build()
-                .parseSignedClaims(token)
-                .getPayload();
+                .parseClaimsJws(token)
+                .getBody();
     }
 }

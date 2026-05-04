@@ -4,12 +4,11 @@ import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
-
 import java.time.OffsetDateTime;
 
 @Entity
 @Table(name = "departments")
-@Getter @Setter @NoArgsConstructor @AllArgsConstructor @Builder
+@Getter @Setter @NoArgsConstructor @AllArgsConstructor
 public class Department {
 
     @Id

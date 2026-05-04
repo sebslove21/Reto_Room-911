@@ -4,12 +4,11 @@ import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
-
 import java.time.OffsetDateTime;
 
 @Entity
 @Table(name = "employees")
-@Getter @Setter @NoArgsConstructor @AllArgsConstructor @Builder
+@Getter @Setter @NoArgsConstructor @AllArgsConstructor
 public class Employee {
 
     @Id
@@ -28,7 +27,7 @@ public class Employee {
     @Column(name = "email", length = 180)
     private String email;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "department_id", nullable = false)
     private Department department;
 

@@ -1,5 +1,5 @@
-import api from './axios';
-import type { LoginRequest, AuthResponse } from '../components/types';
+import api from './axios'
+import type { LoginRequest, AuthResponse } from '../types'
 
 export const authApi = {
   login: (data: LoginRequest) =>
@@ -12,5 +12,5 @@ export const authApi = {
     api.post('/auth/reset-password', { token, newPassword }),
 
   changePassword: (currentPassword: string, newPassword: string) =>
-    api.post('/users/me/change-password', { currentPassword, newPassword }),
-};
+    api.post('/auth/change-password', { currentPassword, newPassword }),
+}

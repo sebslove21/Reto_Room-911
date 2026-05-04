@@ -4,9 +4,7 @@ import room911_project.enums.AuditAction;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
-
 import java.time.OffsetDateTime;
-import java.util.UUID;
 
 @Entity
 @Table(name = "admin_action_log")
