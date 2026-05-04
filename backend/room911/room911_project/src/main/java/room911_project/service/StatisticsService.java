@@ -2,6 +2,7 @@ package room911_project.service;
 
 import room911_project.dto.response.DashboardSummaryResponse;
 import room911_project.dto.response.DepartmentStatsResponse;
+import room911_project.enums.AccessResult;
 import room911_project.repository.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -23,31 +24,21 @@ public class StatisticsService {
     @Transactional(readOnly = true)
     public DashboardSummaryResponse getSummary() {
         ZoneOffset tz = ZoneOffset.ofHours(-5);
-        OffsetDateTime startOfDay = LocalDate.now(tz)
-                .atStartOfDay().atOffset(tz);
+        OffsetDateTime startOfDay = LocalDate.now(tz).atStartOfDay().atOffset(tz);
 
-        int maxCap = roomSettingsRepository.findAll()
-                .stream().findFirst()
+        int maxCap = roomSettingsRepository.findAll().stream().findFirst()
                 .map(s -> s.getMaxCapacity()).orElse(0);
 
-        long activeAdmins = adminRepository.findAll()
-                .stream()
-                .filter(a -> Boolean.TRUE.equals(a.getIsActive()))
-                .count();
-
-        long totalEmployees  = employeeRepository.count();
-        long accessesToday   = accessLogRepository
-                .countGrantedAfter(startOfDay);
-        long currentOccupancy= employeeRepository.countByIsInsideTrue();
-        long deniedToday     = accessLogRepository
-                .countDeniedAfter(startOfDay);
+        long activeAdmins = adminRepository.findAll().stream()
+                .filter(a -> Boolean.TRUE.equals(a.getIsActive())).count();
 
         return DashboardSummaryResponse.builder()
-                .totalEmployees(totalEmployees)
-                .accessesToday(accessesToday)
-                .currentOccupancy(currentOccupancy)
+                .totalEmployees(employeeRepository.count())
+                .accessesToday(accessLogRepository.countByResultAfter(startOfDay, AccessResult.GRANTED))
+                .currentOccupancy(employeeRepository.countByIsInsideTrue())
                 .maxCapacity(maxCap)
-                .deniedToday(deniedToday)
+                .deniedToday(accessLogRepository.countByAccessedAtAfter(startOfDay)
+                        - accessLogRepository.countByResultAfter(startOfDay, AccessResult.GRANTED))
                 .activeAdmins(activeAdmins)
                 .build();
     }
@@ -62,12 +53,20 @@ public class StatisticsService {
         long total = accessLogRepository.countByAccessedAtAfter(start);
 
         return departmentRepository.findAll().stream().map(dept -> {
-            long granted = accessLogRepository
-                    .countGrantedByDepartment(start, dept.getId());
-            long denied  = accessLogRepository
-                    .countDeniedByDepartment(start, dept.getId());
-            double pct = total > 0
-                    ? ((granted + denied) * 100.0) / total : 0;
+            long granted = accessLogRepository.countByResultAndDepartment(
+                    start, AccessResult.GRANTED, dept.getId());
+            long denied  = accessLogRepository.countByAccessedAtAfter(start)
+                    - accessLogRepository.countByResultAndDepartment(
+                            start, AccessResult.GRANTED, dept.getId());
+            // Recalcular denied por departamento correctamente
+            denied = accessLogRepository.countByResultAndDepartment(
+                    start, AccessResult.DENIED_NO_PERMISSION, dept.getId())
+                    + accessLogRepository.countByResultAndDepartment(
+                            start, AccessResult.DENIED_NOT_FOUND, dept.getId())
+                    + accessLogRepository.countByResultAndDepartment(
+                            start, AccessResult.DENIED_MAX_CAPACITY, dept.getId());
+
+            double pct = total > 0 ? ((granted + denied) * 100.0) / total : 0;
 
             return DepartmentStatsResponse.builder()
                     .departmentId(dept.getId())
@@ -80,26 +79,20 @@ public class StatisticsService {
         }).collect(Collectors.toList());
     }
 
-    private OffsetDateTime resolveStart(
-            String period, String startDate, ZoneOffset tz) {
+    private OffsetDateTime resolveStart(String period, String startDate, ZoneOffset tz) {
         if (startDate != null)
-            return LocalDate.parse(startDate)
-                    .atStartOfDay().atOffset(tz);
+            return LocalDate.parse(startDate).atStartOfDay().atOffset(tz);
         LocalDate today = LocalDate.now(tz);
         return switch (period != null ? period : "today") {
-            case "week"  -> today.minusDays(7)
-                    .atStartOfDay().atOffset(tz);
-            case "month" -> today.minusDays(30)
-                    .atStartOfDay().atOffset(tz);
+            case "week"  -> today.minusDays(7).atStartOfDay().atOffset(tz);
+            case "month" -> today.minusDays(30).atStartOfDay().atOffset(tz);
             default      -> today.atStartOfDay().atOffset(tz);
         };
     }
 
-    private OffsetDateTime resolveEnd(
-            String endDate, ZoneOffset tz) {
+    private OffsetDateTime resolveEnd(String endDate, ZoneOffset tz) {
         return endDate != null
-                ? LocalDate.parse(endDate)
-                        .atTime(23, 59, 59).atOffset(tz)
+                ? LocalDate.parse(endDate).atTime(23, 59, 59).atOffset(tz)
                 : OffsetDateTime.now(tz);
     }
 }

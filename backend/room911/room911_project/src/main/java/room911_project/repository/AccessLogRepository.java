@@ -1,8 +1,8 @@
 package room911_project.repository;
 
+import room911_project.enums.AccessResult;
 import room911_project.model.AccessLog;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -14,12 +14,11 @@ import java.util.List;
 @Repository
 public interface AccessLogRepository extends JpaRepository<AccessLog, Long> {
 
-    // ── Para historial paginado ───────────────────────────────
+    // ── Historial paginado — sin IS NULL, siempre con fechas reales ──────────
     @Query("""
         SELECT l FROM AccessLog l
         WHERE (:employeeId IS NULL
-               OR (l.employee IS NOT NULL
-                   AND l.employee.id = :employeeId))
+               OR (l.employee IS NOT NULL AND l.employee.id = :employeeId))
         AND l.accessedAt >= :start
         AND l.accessedAt <= :end
         ORDER BY l.accessedAt DESC
@@ -30,12 +29,15 @@ public interface AccessLogRepository extends JpaRepository<AccessLog, Long> {
             @Param("end")   OffsetDateTime end,
             Pageable pageable);
 
-    // ── Para exportar PDF ─────────────────────────────────────
+    // ── PDF — también con fechas reales, sin IS NULL ───────────────────────
     @Query("""
         SELECT l FROM AccessLog l
-        WHERE l.employee.id = :employeeId
-        AND (:start IS NULL OR l.accessedAt >= :start)
-        AND (:end   IS NULL OR l.accessedAt <= :end)
+        LEFT JOIN FETCH l.employee e
+        LEFT JOIN FETCH e.department
+        WHERE l.employee IS NOT NULL
+        AND l.employee.id = :employeeId
+        AND l.accessedAt >= :start
+        AND l.accessedAt <= :end
         ORDER BY l.accessedAt DESC
         """)
     List<AccessLog> findByEmployeeForPdf(
@@ -43,46 +45,28 @@ public interface AccessLogRepository extends JpaRepository<AccessLog, Long> {
             @Param("start") OffsetDateTime start,
             @Param("end")   OffsetDateTime end);
 
-    // ── Para dashboard ────────────────────────────────────────
-    @Query("""
-        SELECT COUNT(l) FROM AccessLog l
-        WHERE l.accessedAt > :since
-        """)
+    // ── Dashboard conteos ─────────────────────────────────────────────────────
+    @Query("SELECT COUNT(l) FROM AccessLog l WHERE l.accessedAt > :since")
     long countByAccessedAtAfter(@Param("since") OffsetDateTime since);
 
     @Query("""
         SELECT COUNT(l) FROM AccessLog l
         WHERE l.accessedAt >= :since
-        AND l.result = room911_project.enums.AccessResult.GRANTED
+        AND l.result = :result
         """)
-    long countGrantedAfter(@Param("since") OffsetDateTime since);
+    long countByResultAfter(
+            @Param("since") OffsetDateTime since,
+            @Param("result") AccessResult result);
 
     @Query("""
         SELECT COUNT(l) FROM AccessLog l
         WHERE l.accessedAt >= :since
-        AND l.result <> room911_project.enums.AccessResult.GRANTED
-        """)
-    long countDeniedAfter(@Param("since") OffsetDateTime since);
-
-    @Query("""
-        SELECT COUNT(l) FROM AccessLog l
-        WHERE l.accessedAt >= :since
-        AND l.result = room911_project.enums.AccessResult.GRANTED
+        AND l.result = :result
         AND l.employee IS NOT NULL
         AND l.employee.department.id = :departmentId
         """)
-    long countGrantedByDepartment(
+    long countByResultAndDepartment(
             @Param("since") OffsetDateTime since,
-            @Param("departmentId") Integer departmentId);
-
-    @Query("""
-        SELECT COUNT(l) FROM AccessLog l
-        WHERE l.accessedAt >= :since
-        AND l.result <> room911_project.enums.AccessResult.GRANTED
-        AND l.employee IS NOT NULL
-        AND l.employee.department.id = :departmentId
-        """)
-    long countDeniedByDepartment(
-            @Param("since") OffsetDateTime since,
+            @Param("result") AccessResult result,
             @Param("departmentId") Integer departmentId);
 }

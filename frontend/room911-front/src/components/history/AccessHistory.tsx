@@ -1,13 +1,9 @@
 import { useState, useEffect } from 'react'
-import {
-  Search, Download, Calendar, ChevronDown
-} from 'lucide-react'
+import { Search, Download, Calendar, ChevronDown, X } from 'lucide-react'
 import { toast } from 'sonner'
 import { logsApi } from '../../api'
 import { employeesApi } from '../../api/employees.api'
-import {
-  formatDateTime, getAccessResultLabel, downloadBlob
-} from '../../utils/formatters'
+import { formatDateTime, getAccessResultLabel } from '../../utils/formatters'
 import type { AccessLog, Employee } from '../../types'
 
 export function AccessHistory() {
@@ -21,6 +17,9 @@ export function AccessHistory() {
   const [totalElements,    setTotalElements]    = useState(0)
   const [loading,          setLoading]          = useState(true)
   const [exporting,        setExporting]        = useState(false)
+
+  // Hoy en formato YYYY-MM-DD para el atributo max de los inputs de fecha
+  const today = new Date().toISOString().slice(0, 10)
 
   useEffect(() => {
     employeesApi.getAll({ size: 200 })
@@ -59,22 +58,47 @@ export function AccessHistory() {
     }
     setExporting(true)
     try {
-      const { data } = await logsApi.exportPdf(
+      const response = await logsApi.exportPdf(
         Number(selectedEmployee),
         startDate || undefined,
         endDate   || undefined,
       )
+      // Crear Blob explícitamente — axios puede devolver ArrayBuffer o Blob según el browser
+      const blob = new Blob([response.data], { type: 'application/pdf' })
+      const url  = URL.createObjectURL(blob)
       const emp  = employees.find(e => e.id === Number(selectedEmployee))
-      const name = emp
-        ? `${emp.lastName}_${emp.firstName}` : `emp_${selectedEmployee}`
+      const name = emp ? `${emp.lastName}_${emp.firstName}` : `emp_${selectedEmployee}`
       const date = new Date().toISOString().slice(0, 10)
-      downloadBlob(data, `historial_${name}_${date}.pdf`)
+      const a    = document.createElement('a')
+      a.href     = url
+      a.download = `historial_${name}_${date}.pdf`
+      document.body.appendChild(a)
+      a.click()
+      a.remove()
+      URL.revokeObjectURL(url)
       toast.success('PDF exportado correctamente')
     } catch {
       toast.error('Error al generar el PDF')
     } finally {
       setExporting(false)
     }
+  }
+
+  const handleStartDateChange = (val: string) => {
+    setStartDate(val)
+    // Si la fecha de fin es anterior a la nueva fecha de inicio, limpiarla
+    if (endDate && val && endDate < val) setEndDate('')
+    setPage(0)
+  }
+
+  const handleEndDateChange = (val: string) => {
+    // No permitir fecha fin anterior a fecha inicio
+    if (startDate && val && val < startDate) {
+      toast.error('La fecha final no puede ser anterior a la fecha inicial')
+      return
+    }
+    setEndDate(val)
+    setPage(0)
   }
 
   const clearFilters = () => {
@@ -110,8 +134,7 @@ export function AccessHistory() {
         </div>
         <button onClick={handleExportPdf}
           disabled={exporting || !selectedEmployee || logs.length === 0}
-          title={!selectedEmployee
-            ? 'Selecciona un empleado para exportar' : ''}
+          title={!selectedEmployee ? 'Selecciona un empleado para exportar' : ''}
           style={{
             display: 'flex', alignItems: 'center', gap: 8,
             padding: '9px 16px', backgroundColor: '#d32f2f',
@@ -123,10 +146,8 @@ export function AccessHistory() {
           }}>
           {exporting
             ? <div style={{
-                width: 14, height: 14,
-                border: '2px solid white',
-                borderTopColor: 'transparent',
-                borderRadius: '50%',
+                width: 14, height: 14, border: '2px solid white',
+                borderTopColor: 'transparent', borderRadius: '50%',
                 animation: 'spin 0.8s linear infinite',
               }} />
             : <Download size={14} />}
@@ -154,8 +175,7 @@ export function AccessHistory() {
           }} />
           <select value={selectedEmployee}
             onChange={e => {
-              setSelectedEmployee(
-                e.target.value ? Number(e.target.value) : '')
+              setSelectedEmployee(e.target.value ? Number(e.target.value) : '')
               setPage(0)
             }}
             style={{
@@ -173,20 +193,21 @@ export function AccessHistory() {
           </select>
         </div>
 
-        {/* Date range */}
-        <div style={{
-          display: 'flex', alignItems: 'center', gap: 8,
-        }}>
+        {/* Date range — con validaciones */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
           <Calendar size={15} color="#546e7a" />
           <input type="date" value={startDate}
-            onChange={e => { setStartDate(e.target.value); setPage(0) }}
+            max={today}                        // No permite fechas futuras en "desde"
+            onChange={e => handleStartDateChange(e.target.value)}
             style={{
               padding: '9px 10px', border: '1px solid #e0e0e0',
               borderRadius: 8, fontSize: 13, outline: 'none',
             }} />
           <span style={{ fontSize: 12, color: '#546e7a' }}>hasta</span>
-          <input type="date" value={endDate} min={startDate}
-            onChange={e => { setEndDate(e.target.value); setPage(0) }}
+          <input type="date" value={endDate}
+            min={startDate || undefined}       // No permite fecha anterior al inicio
+            max={today}                        // No permite fechas futuras en "hasta"
+            onChange={e => handleEndDateChange(e.target.value)}
             style={{
               padding: '9px 10px', border: '1px solid #e0e0e0',
               borderRadius: 8, fontSize: 13, outline: 'none',
@@ -195,10 +216,12 @@ export function AccessHistory() {
 
         {hasFilters && (
           <button onClick={clearFilters} style={{
+            display: 'flex', alignItems: 'center', gap: 4,
             background: 'none', border: 'none',
             color: '#1976d2', fontSize: 13,
             cursor: 'pointer', whiteSpace: 'nowrap',
           }}>
+            <X size={13} />
             Limpiar filtros
           </button>
         )}
@@ -261,18 +284,12 @@ export function AccessHistory() {
                       (e.currentTarget as HTMLElement)
                         .style.backgroundColor = 'transparent'}
                   >
-                    <td style={{
-                      ...cell, fontFamily: 'monospace', color: '#1a1d29',
-                    }}>
+                    <td style={{ ...cell, fontFamily: 'monospace', color: '#1a1d29' }}>
                       {log.internalIdRaw}
                     </td>
-                    <td style={{
-                      ...cell, fontWeight: 500, color: '#1a1d29',
-                    }}>
+                    <td style={{ ...cell, fontWeight: 500, color: '#1a1d29' }}>
                       {log.employeeName ?? (
-                        <span style={{
-                          color: '#546e7a', fontStyle: 'italic',
-                        }}>
+                        <span style={{ color: '#546e7a', fontStyle: 'italic' }}>
                           No registrado
                         </span>
                       )}
@@ -313,8 +330,7 @@ export function AccessHistory() {
             justifyContent: 'space-between',
           }}>
             <span style={{ fontSize: 12, color: '#546e7a' }}>
-              Página {page + 1} de {totalPages} ·{' '}
-              {totalElements} registros
+              Página {page + 1} de {totalPages} · {totalElements} registros
             </span>
             <div style={{ display: 'flex', gap: 8 }}>
               <button onClick={() => setPage(p => Math.max(0, p - 1))}
@@ -329,14 +345,12 @@ export function AccessHistory() {
                 Anterior
               </button>
               <button
-                onClick={() =>
-                  setPage(p => Math.min(totalPages - 1, p + 1))}
+                onClick={() => setPage(p => Math.min(totalPages - 1, p + 1))}
                 disabled={page >= totalPages - 1}
                 style={{
                   padding: '6px 12px', fontSize: 12,
                   border: '1px solid #e0e0e0', borderRadius: 6,
-                  cursor: page >= totalPages - 1
-                    ? 'not-allowed' : 'pointer',
+                  cursor: page >= totalPages - 1 ? 'not-allowed' : 'pointer',
                   opacity: page >= totalPages - 1 ? 0.4 : 1,
                   backgroundColor: 'white',
                 }}>
@@ -348,9 +362,7 @@ export function AccessHistory() {
       </div>
       <style>{`
         @keyframes spin    { to { transform: rotate(360deg) } }
-        @keyframes shimmer {
-          0%,100% { opacity:1 } 50% { opacity:0.4 }
-        }
+        @keyframes shimmer { 0%,100% { opacity:1 } 50% { opacity:0.4 } }
       `}</style>
     </div>
   )
