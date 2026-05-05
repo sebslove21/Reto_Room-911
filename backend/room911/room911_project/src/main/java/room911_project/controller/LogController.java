@@ -2,17 +2,21 @@ package room911_project.controller;
 
 import room911_project.dto.response.AccessLogResponse;
 import room911_project.service.LogService;
-import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/logs")
-@RequiredArgsConstructor
 public class LogController {
 
+    
+
     private final LogService logService;
+
+    public LogController(LogService logService) {
+        this.logService = logService;
+    }
 
     @GetMapping("/all")
     public ResponseEntity<Page<AccessLogResponse>> getAll(

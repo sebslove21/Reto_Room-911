@@ -5,8 +5,6 @@ import com.itextpdf.text.pdf.*;
 import room911_project.dto.response.AccessLogResponse;
 import room911_project.model.*;
 import room911_project.repository.*;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -14,14 +12,19 @@ import java.io.ByteArrayOutputStream;
 import java.time.*;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-@Slf4j
 @Service
-@RequiredArgsConstructor
 public class LogService {
+    private static final Logger log = LoggerFactory.getLogger(LogService.class);
 
     private final AccessLogRepository accessLogRepository;
     private final EmployeeRepository  employeeRepository;
+    public LogService(AccessLogRepository accessLogRepository, EmployeeRepository employeeRepository) {
+        this.accessLogRepository = accessLogRepository;
+        this.employeeRepository = employeeRepository;
+    }
 
     private static final DateTimeFormatter FMT =
             DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss");

@@ -4,8 +4,6 @@ import room911_project.model.Employee;
 import room911_project.model.RoomSettings;
 import room911_project.repository.EmployeeRepository;
 import room911_project.repository.RoomSettingsRepository;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
@@ -14,15 +12,21 @@ import java.time.OffsetDateTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @Component
-@Slf4j
-@RequiredArgsConstructor
 public class PresenceMonitorScheduler {
+    private static final Logger log = LoggerFactory.getLogger(PresenceMonitorScheduler.class);
 
     private final EmployeeRepository     employeeRepository;
     private final RoomSettingsRepository roomSettingsRepository;
     private final SimpMessagingTemplate  messagingTemplate;
+    public PresenceMonitorScheduler(EmployeeRepository employeeRepository, RoomSettingsRepository roomSettingsRepository, SimpMessagingTemplate messagingTemplate) {
+        this.employeeRepository = employeeRepository;
+        this.roomSettingsRepository = roomSettingsRepository;
+        this.messagingTemplate = messagingTemplate;
+    }
 
     @Scheduled(fixedRate = 60000)
     public void checkStayTimes() {

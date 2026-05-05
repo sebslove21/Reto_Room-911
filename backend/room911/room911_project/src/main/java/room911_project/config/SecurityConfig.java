@@ -1,8 +1,7 @@
 package room911_project.config;
 
-import room911_project.security.JwtAuthFilter;
-import room911_project.security.UserDetailsServiceImpl;
-import lombok.RequiredArgsConstructor;
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -22,12 +21,13 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
-import java.util.List;
+
+import room911_project.security.JwtAuthFilter;
+import room911_project.security.UserDetailsServiceImpl;
 
 @Configuration
 @EnableWebSecurity
 @EnableMethodSecurity
-@RequiredArgsConstructor
 public class SecurityConfig {
 
     private final JwtAuthFilter jwtAuthFilter;
@@ -35,6 +35,11 @@ public class SecurityConfig {
 
     @Value("${app.cors.allowed-origins}")
     private String allowedOrigin;
+
+    public SecurityConfig(JwtAuthFilter jwtAuthFilter, UserDetailsServiceImpl userDetailsService) {
+        this.jwtAuthFilter = jwtAuthFilter;
+        this.userDetailsService = userDetailsService;
+    }
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
@@ -46,7 +51,8 @@ public class SecurityConfig {
                 .requestMatchers(
                     "/api/auth/**",
                     "/ws-room911/**",
-                    "/api/access/validate"
+                    "/api/access/validate",
+                    "/api/room/status"
                 ).permitAll()
                 .requestMatchers("/api/superadmin/**").hasAuthority("ROLE_SUPER_ADMIN")
                 .anyRequest().authenticated()

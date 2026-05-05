@@ -8,7 +8,6 @@ import room911_project.model.Admin;
 import room911_project.repository.AdminRepository;
 import room911_project.security.JwtUtil;
 import room911_project.security.UserDetailsServiceImpl;
-import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -17,7 +16,6 @@ import org.springframework.stereotype.Service;
 import java.time.OffsetDateTime;
 
 @Service
-@RequiredArgsConstructor
 public class AuthService {
 
     private final AdminRepository adminRepository;
@@ -25,6 +23,13 @@ public class AuthService {
     private final JwtUtil jwtUtil;
     private final UserDetailsServiceImpl userDetailsService;
     private final PasswordEncoder passwordEncoder;
+    public AuthService(AdminRepository adminRepository, AuthenticationManager authManager, JwtUtil jwtUtil, UserDetailsServiceImpl userDetailsService, PasswordEncoder passwordEncoder) {
+        this.adminRepository = adminRepository;
+        this.authManager = authManager;
+        this.jwtUtil = jwtUtil;
+        this.userDetailsService = userDetailsService;
+        this.passwordEncoder = passwordEncoder;
+    }
 
     public AuthResponse login(LoginRequest request) {
         authManager.authenticate(

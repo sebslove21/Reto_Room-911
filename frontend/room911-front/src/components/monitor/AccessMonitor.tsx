@@ -127,7 +127,7 @@ export function AccessMonitor() {
   })
 
   const currentOccupancy = status
-    ? status.currentOccupancy ?? status.employeesInside.length
+    ? status.currentOccupancy ?? status.employeesInside?.length ?? 0
     : 0
 
   const occupancyPct = status && status.maxCapacity > 0
@@ -223,7 +223,7 @@ export function AccessMonitor() {
                   <span style={{
                     fontSize: 14, color: '#546e7a', fontWeight: 400,
                   }}>
-                    /{status.maxCapacity}
+                    /{status?.maxCapacity ?? 0}
                   </span>
                 </div>
               </div>
@@ -261,9 +261,9 @@ export function AccessMonitor() {
               display: 'flex', alignItems: 'center', gap: 4,
             }}>
               <Clock size={11} />
-              Tiempo máx: {status.maxStayMinutes} min
+              Tiempo máx: {status?.maxStayMinutes ?? 0} min
             </div>
-            <span>{status.maxCapacity} personas</span>
+            <span>{status?.maxCapacity ?? 0} personas</span>
           </div>
         </div>
       )}
@@ -284,7 +284,7 @@ export function AccessMonitor() {
             }} />
           ))}
         </div>
-      ) : !status || status.employeesInside.length === 0 ? (
+      ) : !status || !status.employeesInside || status.employeesInside.length === 0 ? (
         <div style={{
           backgroundColor: 'white', borderRadius: 14,
           border: '1px solid #e0e0e0', padding: 64,
@@ -315,11 +315,11 @@ export function AccessMonitor() {
             'repeat(auto-fill, minmax(160px, 1fr))',
           gap: 16,
         }}>
-          {status.employeesInside.map(emp => (
+          {status?.employeesInside?.map(emp => (
             <PresenceCard
               key={emp.id}
               emp={emp}
-              maxMinutes={status.maxStayMinutes}
+              maxMinutes={status?.maxStayMinutes ?? 0}
             />
           ))}
         </div>

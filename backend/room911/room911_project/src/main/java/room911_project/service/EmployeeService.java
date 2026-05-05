@@ -12,7 +12,6 @@ import room911_project.repository.DepartmentRepository;
 import room911_project.repository.EmployeeRepository;
 import com.opencsv.CSVReader;
 import com.opencsv.exceptions.CsvException;
-import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -21,11 +20,14 @@ import java.io.*;
 import java.util.*;
 
 @Service
-@RequiredArgsConstructor
 public class EmployeeService {
 
     private final EmployeeRepository   employeeRepository;
     private final DepartmentRepository departmentRepository;
+    public EmployeeService(EmployeeRepository employeeRepository, DepartmentRepository departmentRepository) {
+        this.employeeRepository = employeeRepository;
+        this.departmentRepository = departmentRepository;
+    }
 
     @Transactional(readOnly = true)
     public Page<EmployeeResponse> search(String search,

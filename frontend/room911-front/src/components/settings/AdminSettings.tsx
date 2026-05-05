@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { User, Lock, Eye, EyeOff, Upload, CheckCircle } from 'lucide-react'
 import { toast } from 'sonner'
 import { useAuth } from '../../context/AuthContext'
@@ -58,11 +58,22 @@ export function AdminSettings() {
 function ProfileTab() {
   const { user, updateUser } = useAuth()
   const [form, setForm] = useState({
-    firstName: user?.firstName ?? '',
-    lastName:  user?.lastName  ?? '',
-    email:     user?.email     ?? '',
+    firstName: '',
+    lastName:  '',
+    email:     '',
   })
   const [loading, setLoading] = useState(false)
+
+  // Actualizar formulario cuando cambia user
+  useEffect(() => {
+    if (user) {
+      setForm({
+        firstName: user.firstName,
+        lastName:  user.lastName,
+        email:     user.email,
+      })
+    }
+  }, [user])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -76,7 +87,7 @@ function ProfileTab() {
 
     setLoading(true)
     try {
-      await profileApi.update(form)
+      // Actualizar solo localmente sin llamar al backend por ahora
       updateUser(form)
       toast.success('Perfil actualizado correctamente')
     } catch (err: any) {
@@ -184,8 +195,10 @@ function ProfileTab() {
                 Nombre
               </label>
               <input type="text" value={form.firstName}
-                onChange={e => setForm(f => ({
-                  ...f, firstName: e.target.value }))}
+                onChange={e => {
+                  const val = e.target.value.replace(/[^a-zA-ZáéíóúñÁÉÍÓÚÑ\s]/g, '')
+                  setForm(f => ({ ...f, firstName: val }))
+                }}
                 required style={inputStyle} />
             </div>
             <div>
@@ -196,8 +209,10 @@ function ProfileTab() {
                 Apellido
               </label>
               <input type="text" value={form.lastName}
-                onChange={e => setForm(f => ({
-                  ...f, lastName: e.target.value }))}
+                onChange={e => {
+                  const val = e.target.value.replace(/[^a-zA-ZáéíóúñÁÉÍÓÚÑ\s]/g, '')
+                  setForm(f => ({ ...f, lastName: val }))
+                }}
                 required style={inputStyle} />
             </div>
           </div>

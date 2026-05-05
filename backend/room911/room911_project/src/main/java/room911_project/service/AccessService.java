@@ -5,22 +5,29 @@ import room911_project.dto.response.*;
 import room911_project.enums.AccessResult;
 import room911_project.model.*;
 import room911_project.repository.*;
-import lombok.RequiredArgsConstructor;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import java.time.*;
 import java.util.*;
 import java.util.stream.Collectors;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @Service
-@RequiredArgsConstructor
 public class AccessService {
+    private static final Logger log = LoggerFactory.getLogger(AccessService.class);
 
     private final EmployeeRepository employeeRepository;
     private final AccessLogRepository accessLogRepository;
     private final RoomSettingsRepository roomSettingsRepository;
     private final SimpMessagingTemplate messagingTemplate;
+    public AccessService(EmployeeRepository employeeRepository, AccessLogRepository accessLogRepository, RoomSettingsRepository roomSettingsRepository, SimpMessagingTemplate messagingTemplate) {
+        this.employeeRepository = employeeRepository;
+        this.accessLogRepository = accessLogRepository;
+        this.roomSettingsRepository = roomSettingsRepository;
+        this.messagingTemplate = messagingTemplate;
+    }
 
     @Transactional
     public AccessLogResponse validate(AccessValidateRequest request) {

@@ -4,7 +4,6 @@ import room911_project.dto.response.DashboardSummaryResponse;
 import room911_project.dto.response.DepartmentStatsResponse;
 import room911_project.enums.AccessResult;
 import room911_project.repository.*;
-import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import java.time.*;
@@ -12,7 +11,6 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
-@RequiredArgsConstructor
 public class StatisticsService {
 
     private final AccessLogRepository    accessLogRepository;
@@ -20,6 +18,13 @@ public class StatisticsService {
     private final AdminRepository        adminRepository;
     private final RoomSettingsRepository roomSettingsRepository;
     private final DepartmentRepository   departmentRepository;
+    public StatisticsService(AccessLogRepository accessLogRepository, EmployeeRepository employeeRepository, AdminRepository adminRepository, RoomSettingsRepository roomSettingsRepository, DepartmentRepository departmentRepository) {
+        this.accessLogRepository = accessLogRepository;
+        this.employeeRepository = employeeRepository;
+        this.adminRepository = adminRepository;
+        this.roomSettingsRepository = roomSettingsRepository;
+        this.departmentRepository = departmentRepository;
+    }
 
     @Transactional(readOnly = true)
     public DashboardSummaryResponse getSummary() {

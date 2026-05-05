@@ -874,15 +874,34 @@ function EmployeeFormModal({
   onSaved: () => void
 }) {
   const [form, setForm] = useState({
-    internalId:   employee?.internalId   ?? '',
-    firstName:    employee?.firstName    ?? '',
-    lastName:     employee?.lastName     ?? '',
-    email:        employee?.email        ?? '',
-    departmentId: employee?.departmentId
-      ?? fixedDepartmentId
-      ?? (departments[0]?.id ?? 0),
+    internalId:   '',
+    firstName:    '',
+    lastName:     '',
+    email:        '',
+    departmentId: fixedDepartmentId ?? (departments[0]?.id ?? 0),
   })
   const [loading, setLoading] = useState(false)
+
+  // Actualizar formulario cuando cambia employee
+  useEffect(() => {
+    if (employee) {
+      setForm({
+        internalId:   employee.internalId,
+        firstName:    employee.firstName,
+        lastName:     employee.lastName,
+        email:        employee.email,
+        departmentId: employee.departmentId,
+      })
+    } else {
+      setForm({
+        internalId:   '',
+        firstName:    '',
+        lastName:     '',
+        email:        '',
+        departmentId: fixedDepartmentId ?? (departments[0]?.id ?? 0),
+      })
+    }
+  }, [employee, fixedDepartmentId, departments])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -990,8 +1009,10 @@ function EmployeeFormModal({
                 </label>
                 <input
                   type="text" value={form.firstName}
-                  onChange={e => setForm(f => ({
-                    ...f, firstName: e.target.value }))}
+                  onChange={e => {
+                    const val = e.target.value.replace(/[^a-zA-ZáéíóúñÁÉÍÓÚÑ\s]/g, '')
+                    setForm(f => ({ ...f, firstName: val }))
+                  }}
                   required style={inputStyle} />
               </div>
               <div>
@@ -1003,8 +1024,10 @@ function EmployeeFormModal({
                 </label>
                 <input
                   type="text" value={form.lastName}
-                  onChange={e => setForm(f => ({
-                    ...f, lastName: e.target.value }))}
+                  onChange={e => {
+                    const val = e.target.value.replace(/[^a-zA-ZáéíóúñÁÉÍÓÚÑ\s]/g, '')
+                    setForm(f => ({ ...f, lastName: val }))
+                  }}
                   required style={inputStyle} />
               </div>
             </div>

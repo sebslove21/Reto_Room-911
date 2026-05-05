@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import {
   Plus, UserCog, ToggleLeft,
   ToggleRight, Search, Crown, Edit
@@ -288,15 +288,38 @@ function AdminFormModal({
   onSaved: () => void
 }) {
   const [form, setForm] = useState({
-    firstName:    admin?.firstName    ?? '',
-    lastName:     admin?.lastName     ?? '',
-    email:        admin?.email        ?? '',
+    firstName:    '',
+    lastName:     '',
+    email:        '',
     password:     '',
     confirmPwd:   '',
-    departmentId: admin?.departmentId ?? (departments[0]?.id ?? 0),
+    departmentId: departments[0]?.id ?? 0,
   })
   const [loading,  setLoading]  = useState(false)
   const [pwdError, setPwdError] = useState('')
+
+  // Actualizar formulario cuando cambia admin
+  useEffect(() => {
+    if (admin) {
+      setForm({
+        firstName:    admin.firstName,
+        lastName:     admin.lastName,
+        email:        admin.email,
+        password:     '',
+        confirmPwd:   '',
+        departmentId: admin.departmentId,
+      })
+    } else {
+      setForm({
+        firstName:    '',
+        lastName:     '',
+        email:        '',
+        password:     '',
+        confirmPwd:   '',
+        departmentId: departments[0]?.id ?? 0,
+      })
+    }
+  }, [admin, departments])
 
   const inputStyle: React.CSSProperties = {
     width: '100%', padding: '9px 12px',
@@ -378,15 +401,19 @@ function AdminFormModal({
               <div>
                 <label style={labelStyle}>Nombre</label>
                 <input type="text" value={form.firstName}
-                  onChange={e => setForm(f => ({
-                    ...f, firstName: e.target.value }))}
+                  onChange={e => {
+                    const val = e.target.value.replace(/[^a-zA-ZáéíóúñÁÉÍÓÚÑ\s]/g, '')
+                    setForm(f => ({ ...f, firstName: val }))
+                  }}
                   required style={inputStyle} />
               </div>
               <div>
                 <label style={labelStyle}>Apellido</label>
                 <input type="text" value={form.lastName}
-                  onChange={e => setForm(f => ({
-                    ...f, lastName: e.target.value }))}
+                  onChange={e => {
+                    const val = e.target.value.replace(/[^a-zA-ZáéíóúñÁÉÍÓÚÑ\s]/g, '')
+                    setForm(f => ({ ...f, lastName: val }))
+                  }}
                   required style={inputStyle} />
               </div>
             </div>

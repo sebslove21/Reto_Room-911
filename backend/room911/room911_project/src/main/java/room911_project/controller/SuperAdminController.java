@@ -13,7 +13,6 @@ import room911_project.repository.AdminActionLogRepository;
 import room911_project.repository.AdminRepository;
 import room911_project.repository.DepartmentRepository;
 import jakarta.validation.Valid;
-import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.*;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -27,10 +26,18 @@ import java.util.stream.Collectors;
 @RestController
 @RequestMapping("/api/superadmin")
 @PreAuthorize("hasAuthority('ROLE_SUPER_ADMIN')")
-@RequiredArgsConstructor
 public class SuperAdminController {
 
-    private final AdminRepository          adminRepository;
+    
+
+    private final AdminRepository adminRepository;
+
+    public SuperAdminController(AdminRepository adminRepository, DepartmentRepository departmentRepository, AdminActionLogRepository auditLogRepository, PasswordEncoder passwordEncoder) {
+        this.adminRepository = adminRepository;
+        this.departmentRepository = departmentRepository;
+        this.auditLogRepository = auditLogRepository;
+        this.passwordEncoder = passwordEncoder;
+    }
     private final DepartmentRepository     departmentRepository;
     private final AdminActionLogRepository auditLogRepository;
     private final PasswordEncoder          passwordEncoder;

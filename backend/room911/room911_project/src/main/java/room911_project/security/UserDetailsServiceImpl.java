@@ -1,19 +1,26 @@
 package room911_project.security;
 
-import room911_project.model.Admin;
-import room911_project.repository.AdminRepository;
-import lombok.RequiredArgsConstructor;
-import org.springframework.security.authentication.DisabledException;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.security.core.userdetails.*;
-import org.springframework.stereotype.Service;
 import java.util.List;
 
+import org.springframework.security.authentication.DisabledException;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.User;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.stereotype.Service;
+
+import room911_project.model.Admin;
+import room911_project.repository.AdminRepository;
+
 @Service
-@RequiredArgsConstructor
 public class UserDetailsServiceImpl implements UserDetailsService {
 
     private final AdminRepository adminRepository;
+
+    public UserDetailsServiceImpl(AdminRepository adminRepository) {
+        this.adminRepository = adminRepository;
+    }
 
     @Override
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {

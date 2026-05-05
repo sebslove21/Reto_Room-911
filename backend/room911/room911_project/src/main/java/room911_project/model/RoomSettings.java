@@ -1,13 +1,18 @@
 package room911_project.model;
 
-import jakarta.persistence.*;
-import lombok.*;
-import org.hibernate.annotations.UpdateTimestamp;
 import java.time.OffsetDateTime;
+
+import org.hibernate.annotations.UpdateTimestamp;
+
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
 
 @Entity
 @Table(name = "room_settings")
-@Getter @Setter @NoArgsConstructor @AllArgsConstructor @Builder
 public class RoomSettings {
 
     @Id
@@ -26,4 +31,47 @@ public class RoomSettings {
     @UpdateTimestamp
     @Column(name = "updated_at")
     private OffsetDateTime updatedAt;
+
+
+            public RoomSettings() {}
+
+    public Integer getMaxCapacity() {
+        return maxCapacity;
+    }
+
+    public void setMaxCapacity(Integer maxCapacity) {
+        this.maxCapacity = maxCapacity;
+    }
+
+        public Integer getMaxStayMinutes() {
+        return maxStayMinutes;
+    }
+
+    public void setMaxStayMinutes(Integer maxStayMinutes) {
+        this.maxStayMinutes = maxStayMinutes;
+    }
+
+        public Integer getAlertThresholdPct() {
+        return alertThresholdPct;
+    }
+
+    public void setAlertThresholdPct(Integer alertThresholdPct) {
+        this.alertThresholdPct = alertThresholdPct;
+    }
+
+        public OffsetDateTime getUpdatedAt() {
+        return updatedAt;
+    }
+
+    public void setUpdatedAt(OffsetDateTime updatedAt) {
+        this.updatedAt = updatedAt;
+    }
+
+    public Integer getId() {
+        return id;
+    }
+
+    public void setId(Integer id) {
+        this.id = id;
+    }
 }

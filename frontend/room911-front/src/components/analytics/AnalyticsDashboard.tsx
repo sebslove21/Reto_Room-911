@@ -52,8 +52,7 @@ export function AnalyticsDashboard() {
         const maxMin = room.maxStayMinutes ?? 60
         const list: AnomalyEntry[] = (room.employeesInside ?? [])
           .map(emp => {
-            if (!emp.enteredAt) return null
-            const minutes = (Date.now() - new Date(emp.enteredAt).getTime()) / 60000
+            const minutes = emp.minutesInside ?? 0
             const pct = minutes / maxMin
             if (pct < 0.5) return null
             return {

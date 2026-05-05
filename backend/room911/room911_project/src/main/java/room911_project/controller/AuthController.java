@@ -4,7 +4,6 @@ import room911_project.dto.request.*;
 import room911_project.dto.response.AuthResponse;
 import room911_project.service.AuthService;
 import jakarta.validation.Valid;
-import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -13,10 +12,16 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/auth")
-@RequiredArgsConstructor
 public class AuthController {
 
+    
+
     private final AuthService authService;
+
+    public AuthController(AuthService authService, PasswordEncoder passwordEncoder) {
+        this.authService = authService;
+        this.passwordEncoder = passwordEncoder;
+    }
     private final PasswordEncoder passwordEncoder;
 
     @PostMapping("/login")

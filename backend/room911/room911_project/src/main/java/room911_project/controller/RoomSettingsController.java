@@ -5,16 +5,20 @@ import room911_project.exception.ResourceNotFoundException;
 import room911_project.model.RoomSettings;
 import room911_project.repository.RoomSettingsRepository;
 import jakarta.validation.Valid;
-import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/room")
-@RequiredArgsConstructor
 public class RoomSettingsController {
 
+    
+
     private final RoomSettingsRepository roomSettingsRepository;
+
+    public RoomSettingsController(RoomSettingsRepository roomSettingsRepository) {
+        this.roomSettingsRepository = roomSettingsRepository;
+    }
 
     @GetMapping("/settings")
     public ResponseEntity<RoomSettings> getSettings() {
