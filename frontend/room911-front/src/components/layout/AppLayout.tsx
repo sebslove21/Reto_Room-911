@@ -355,8 +355,11 @@ export default function AppLayout() {
                   borderRadius: '50%', display: 'flex',
                   alignItems: 'center', justifyContent: 'center',
                   color: 'white', fontSize: 12, fontWeight: 700,
+                  overflow: 'hidden', backgroundSize: 'cover',
+                  backgroundPosition: 'center',
+                  backgroundImage: user?.avatarUrl ? `url(${user.avatarUrl})` : 'none',
                 }}>
-                  {user?.firstName?.[0]}{user?.lastName?.[0]}
+                  {!user?.avatarUrl && `${user?.firstName?.[0]}${user?.lastName?.[0]}`}
                 </div>
                 <div style={{ textAlign: 'left' }}>
                   <div style={{ fontSize: 13, fontWeight: 500, color: '#1a1d29' }}>

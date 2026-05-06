@@ -74,6 +74,9 @@ export const superAdminApi = {
   updateAdmin: (id: string, data: Partial<Admin>) =>
     api.put<Admin>(`/superadmin/admins/${id}`, data),
 
+  deleteAdmin: (id: string) =>
+    api.delete(`/superadmin/admins/${id}`),
+
   toggleAdmin: (id: string, isActive: boolean) =>
     api.patch(`/superadmin/admins/${id}/status`, { isActive }),
 

@@ -18,7 +18,9 @@ public class DepartmentService {
     }
 
     public List<Department> getAll() {
-        return departmentRepository.findAll();
+        return departmentRepository.findAll().stream()
+                .filter(d -> d.getIsActive() != null && d.getIsActive())
+                .toList();
     }
 
     public Department getById(Integer id) {

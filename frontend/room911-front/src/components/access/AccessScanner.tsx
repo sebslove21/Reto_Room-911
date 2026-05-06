@@ -1,7 +1,8 @@
 import { useState, useRef } from 'react'
+import { useNavigate } from 'react-router-dom'
 import {
   Scan, CheckCircle, XCircle,
-  AlertCircle, User, Clock
+  AlertCircle, User, Clock, ArrowLeft
 } from 'lucide-react'
 import { toast } from 'sonner'
 import { accessApi } from '../../api'
@@ -13,6 +14,7 @@ interface Props {
 }
 
 export function AccessScanner({ standalone }: Props) {
+  const navigate = useNavigate()
   const [internalId, setInternalId] = useState('')
   const [loading,    setLoading]    = useState(false)
   const [lastLog,    setLastLog]    = useState<AccessLog | null>(null)
@@ -54,7 +56,33 @@ export function AccessScanner({ standalone }: Props) {
       minHeight: '100vh', backgroundColor: '#0d1117',
       display: 'flex', alignItems: 'center',
       justifyContent: 'center', padding: 16,
+      position: 'relative',
     }}>
+      {/* Botón de regreso */}
+      <button
+        onClick={() => navigate('/login')}
+        style={{
+          position: 'fixed', top: 20, left: 20,
+          display: 'flex', alignItems: 'center', gap: 6,
+          padding: '8px 16px', backgroundColor: 'rgba(255,255,255,0.1)',
+          border: '1px solid rgba(255,255,255,0.2)',
+          color: 'white', borderRadius: 8,
+          fontSize: 13, fontWeight: 600, cursor: 'pointer',
+          transition: 'all 0.15s', zIndex: 100,
+        }}
+        onMouseEnter={e => {
+          (e.currentTarget as HTMLElement).style.backgroundColor = 'rgba(255,255,255,0.15)'
+          ;(e.currentTarget as HTMLElement).style.borderColor = 'rgba(255,255,255,0.3)'
+        }}
+        onMouseLeave={e => {
+          (e.currentTarget as HTMLElement).style.backgroundColor = 'rgba(255,255,255,0.1)'
+          ;(e.currentTarget as HTMLElement).style.borderColor = 'rgba(255,255,255,0.2)'
+        }}
+      >
+        <ArrowLeft size={16} />
+        Atrás
+      </button>
+
       <div style={{ width: '100%', maxWidth: 420 }}>
         {/* Header */}
         <div style={{ textAlign: 'center', marginBottom: 32 }}>

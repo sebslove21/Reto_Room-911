@@ -115,6 +115,15 @@ public class SuperAdminController {
         return ResponseEntity.ok().build();
     }
 
+    @DeleteMapping("/admins/{id}")
+    public ResponseEntity<Void> deleteAdmin(@PathVariable UUID id) {
+        Admin admin = adminRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "Admin no encontrado"));
+        adminRepository.delete(admin);
+        return ResponseEntity.noContent().build();
+    }
+
     // ── Audit Log ─────────────────────────────────────────────────────────────
 
     @GetMapping("/audit-log")

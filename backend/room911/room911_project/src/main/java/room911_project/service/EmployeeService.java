@@ -206,4 +206,10 @@ public class EmployeeService {
                 .orElseThrow(() -> new ResourceNotFoundException(
                         "Departamento no encontrado: " + id));
     }
+
+    @Transactional
+    public void delete(Integer id) {
+        Employee employee = findOrThrow(id);
+        employeeRepository.delete(employee);
+    }
 }

@@ -3,7 +3,7 @@ import {
   Plus, Search, Upload, Edit,
   ToggleLeft, ToggleRight, Filter,
   Download, X, FileText, AlertCircle,
-  CheckCircle
+  CheckCircle, Trash2
 } from 'lucide-react'
 import { toast } from 'sonner'
 import { employeesApi } from '../../api/employees.api'
@@ -483,6 +483,22 @@ export function EmployeeManagement() {
     }
   }
 
+  const handleDeleteEmployee = async (emp: Employee) => {
+    if (!confirm(
+      `¿Eliminar empleado ${emp.firstName} ${emp.lastName}?`)) {
+      return
+    }
+    try {
+      await employeesApi.delete(emp.id)
+      toast.success('Empleado eliminado')
+      loadEmployees()
+    } catch (err: any) {
+      toast.error(
+        err.response?.data?.message ?? 'Error al eliminar empleado'
+      )
+    }
+  }
+
   const handleDownloadTemplate = async () => {
     try {
       const { data } = await employeesApi.downloadTemplate()
@@ -770,6 +786,28 @@ export function EmployeeManagement() {
                           .style.color = '#546e7a'
                       }}>
                       <Edit size={15} />
+                    </button>
+                    <button
+                      onClick={() => handleDeleteEmployee(emp)}
+                      style={{
+                        padding: 6, background: 'none',
+                        border: 'none', cursor: 'pointer',
+                        color: '#d32f2f', borderRadius: 6,
+                        marginLeft: 6,
+                      }}
+                      onMouseEnter={e => {
+                        (e.currentTarget as HTMLElement)
+                          .style.backgroundColor = '#ffebee'
+                        ;(e.currentTarget as HTMLElement)
+                          .style.color = '#d32f2f'
+                      }}
+                      onMouseLeave={e => {
+                        (e.currentTarget as HTMLElement)
+                          .style.backgroundColor = 'transparent'
+                        ;(e.currentTarget as HTMLElement)
+                          .style.color = '#d32f2f'
+                      }}>
+                      <Trash2 size={15} />
                     </button>
                   </td>
                 </tr>

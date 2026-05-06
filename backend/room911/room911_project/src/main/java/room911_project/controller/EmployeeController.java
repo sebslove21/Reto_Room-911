@@ -70,6 +70,12 @@ public class EmployeeController {
                 employeeService.toggleAccess(id, body.get("hasAccess")));
     }
 
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> delete(@PathVariable Integer id) {
+        employeeService.delete(id);
+        return ResponseEntity.noContent().build();
+    }
+
     @PostMapping("/import")
     public ResponseEntity<Map<String, Object>> importCsv(
             @RequestParam("file") MultipartFile file,

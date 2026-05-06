@@ -1,0 +1,16 @@
+{
+  "java.compile.nullAnalysis.mode": "automatic",
+  "java.dependency.packagePresentation": "hierarchical",
+  "[java]": {
+    "editor.defaultFormatter": "redhat.java",
+    "editor.formatOnSave": true
+  },
+  "java.format.settings.url": "https://raw.githubusercontent.com/spring-projects/spring-javaformat/main/spring-javaformat/eclipse-formatter.xml",
+  "java.saveActionsOnOrganizeImports": [
+    "addMissingNonAccessibleTypeAnnotations"
+  ],
+  "java.project.referencedLibraries": {
+    "include": [".m2/repository/**/*.jar"],
+    "exclude": ["**/node_modules/**"]
+  }
+}

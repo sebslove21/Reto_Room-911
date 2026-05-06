@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo } from 'react'
 import {
   Plus, UserCog, ToggleLeft,
-  ToggleRight, Search, Crown, Edit
+  ToggleRight, Search, Crown, Edit, Trash2
 } from 'lucide-react'
 import { toast } from 'sonner'
 import { superAdminApi, departmentsApi } from '../../api'
@@ -40,6 +40,19 @@ export function AdminManagement() {
       reload()
     } catch {
       toast.error('Error al cambiar estado de la cuenta')
+    }
+  }
+
+  const handleDelete = async (admin: Admin) => {
+    if (!confirm(`¿Eliminar administrador ${admin.firstName} ${admin.lastName}?`)) {
+      return
+    }
+    try {
+      await superAdminApi.deleteAdmin(admin.id)
+      toast.success('Administrador eliminado')
+      reload()
+    } catch (err: any) {
+      toast.error(err.response?.data?.message ?? 'Error al eliminar administrador')
     }
   }
 
@@ -259,6 +272,15 @@ export function AdminManagement() {
                     }}>
                       <Edit size={14} />
                     </button>
+                    <button onClick={() => handleDelete(admin)}
+                      style={{
+                        padding: 6, background: 'none',
+                        border: 'none', cursor: 'pointer',
+                        color: '#d32f2f', borderRadius: 6,
+                        marginLeft: 6,
+                      }}>
+                      <Trash2 size={14} />
+                    </button>
                   </td>
                 </tr>
               ))}
@@ -307,7 +329,7 @@ function AdminFormModal({
         email:        admin.email,
         password:     '',
         confirmPwd:   '',
-        departmentId: admin.departmentId,
+        departmentId: admin.departmentId ?? departments[0]?.id ?? 0,
       })
     } else {
       setForm({

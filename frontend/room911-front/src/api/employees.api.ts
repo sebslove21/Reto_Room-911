@@ -18,6 +18,9 @@ export const employeesApi = {
   update: (id: number, data: Partial<CreateEmployeeRequest> & { hasAccess?: boolean }) =>
     api.put<Employee>(`/employees/${id}`, data),
 
+  delete: (id: number) =>
+    api.delete(`/employees/${id}`),
+
   toggleAccess: (id: number, hasAccess: boolean) =>
     api.patch<Employee>(`/employees/${id}/access`, { hasAccess }),
 

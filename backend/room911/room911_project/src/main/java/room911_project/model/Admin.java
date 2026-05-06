@@ -48,7 +48,7 @@ public class Admin {
     @JoinColumn(name = "department_id")
     private Department department;
 
-    @Column(name = "avatar_url", length = 500)
+    @Column(name = "avatar_url", length = 5000000, columnDefinition = "TEXT")
     private String avatarUrl;
 
     @Column(name = "is_active", nullable = false)

@@ -50,6 +50,7 @@ public class UserService {
             throw new RuntimeException("Archivo vacío");
         }
 
+        // Límite de 2MB para la imagen
         if (file.getSize() > 2 * 1024 * 1024) {
             throw new RuntimeException("Archivo muy grande (máx 2MB)");
         }
@@ -58,6 +59,7 @@ public class UserService {
             byte[] fileBytes = file.getBytes();
             String base64String = "data:" + file.getContentType() + ";base64," 
                     + Base64.getEncoder().encodeToString(fileBytes);
+            
             admin.setAvatarUrl(base64String);
             admin = adminRepository.save(admin);
             return toResponse(admin);

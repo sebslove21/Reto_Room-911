@@ -266,52 +266,7 @@ export function Login() {
             </button>
           </div>
 
-          {/* Separador */}
-          <div style={{
-            display: 'flex', alignItems: 'center', gap: 12,
-            marginBottom: 16,
-          }}>
-            <div style={{
-              flex: 1, height: 1, backgroundColor: '#e0e0e0',
-            }} />
-            <span style={{ fontSize: 11, color: '#546e7a' }}>
-              o
-            </span>
-            <div style={{
-              flex: 1, height: 1, backgroundColor: '#e0e0e0',
-            }} />
-          </div>
 
-          {/* Botón Scanner secundario dentro del card */}
-          <button
-            type="button"
-            onClick={() => navigate('/scanner')}
-            style={{
-              width: '100%', padding: '10px',
-              backgroundColor: 'transparent',
-              color: '#2e7d32',
-              border: '2px solid #2e7d32',
-              borderRadius: 8, fontSize: 13,
-              fontWeight: 600, cursor: 'pointer',
-              display: 'flex', alignItems: 'center',
-              justifyContent: 'center', gap: 8,
-              transition: 'all 0.15s',
-            }}
-            onMouseEnter={e => {
-              (e.currentTarget as HTMLElement)
-                .style.backgroundColor = '#2e7d32'
-              ;(e.currentTarget as HTMLElement)
-                .style.color = 'white'
-            }}
-            onMouseLeave={e => {
-              (e.currentTarget as HTMLElement)
-                .style.backgroundColor = 'transparent'
-              ;(e.currentTarget as HTMLElement)
-                .style.color = '#2e7d32'
-            }}>
-            <Scan size={15} />
-            Abrir Scanner ROOM_911
-          </button>
         </form>
 
         {/* Footer */}
