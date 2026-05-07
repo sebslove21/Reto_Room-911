@@ -48,6 +48,12 @@ export const logsApi = {
       params: { startDate, endDate },
       responseType: 'blob',
     }),
+
+  exportAllPdf: (startDate?: string, endDate?: string) =>
+    api.get('/logs/export-pdf-all', {
+      params: { startDate, endDate },
+      responseType: 'blob',
+    }),
 }
 
 // ─── Statistics ───────────────────────────────────────────────────────────────

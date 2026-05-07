@@ -84,6 +84,31 @@ export function AccessHistory() {
     }
   }
 
+  const handleExportAllPdf = async () => {
+    setExporting(true)
+    try {
+      const response = await logsApi.exportAllPdf(
+        startDate || undefined,
+        endDate   || undefined,
+      )
+      const blob = new Blob([response.data], { type: 'application/pdf' })
+      const url  = URL.createObjectURL(blob)
+      const date = new Date().toISOString().slice(0, 10)
+      const a    = document.createElement('a')
+      a.href     = url
+      a.download = `historial_todos_empleados_${date}.pdf`
+      document.body.appendChild(a)
+      a.click()
+      a.remove()
+      URL.revokeObjectURL(url)
+      toast.success('PDF de todos los empleados exportado correctamente')
+    } catch {
+      toast.error('Error al generar el PDF')
+    } finally {
+      setExporting(false)
+    }
+  }
+
   const handleStartDateChange = (val: string) => {
     setStartDate(val)
     // Si la fecha de fin es anterior a la nueva fecha de inicio, limpiarla
@@ -132,27 +157,53 @@ export function AccessHistory() {
             {totalElements} registros encontrados
           </p>
         </div>
-        <button onClick={handleExportPdf}
-          disabled={exporting || !selectedEmployee || logs.length === 0}
-          title={!selectedEmployee ? 'Selecciona un empleado para exportar' : ''}
-          style={{
-            display: 'flex', alignItems: 'center', gap: 8,
-            padding: '9px 16px', backgroundColor: '#d32f2f',
-            color: 'white', border: 'none', borderRadius: 8,
-            fontSize: 13, fontWeight: 600,
-            cursor: exporting || !selectedEmployee || logs.length === 0
-              ? 'not-allowed' : 'pointer',
-            opacity: !selectedEmployee || logs.length === 0 ? 0.5 : 1,
-          }}>
-          {exporting
-            ? <div style={{
-                width: 14, height: 14, border: '2px solid white',
-                borderTopColor: 'transparent', borderRadius: '50%',
-                animation: 'spin 0.8s linear infinite',
-              }} />
-            : <Download size={14} />}
-          Exportar PDF
-        </button>
+        <div style={{ display: 'flex', gap: 10 }}>
+          {/* Botón Exportar Por Empleado */}
+          <button onClick={handleExportPdf}
+            disabled={exporting || !selectedEmployee || logs.length === 0}
+            title={!selectedEmployee ? 'Selecciona un empleado para exportar' : ''}
+            style={{
+              display: 'flex', alignItems: 'center', gap: 8,
+              padding: '9px 16px', backgroundColor: '#d32f2f',
+              color: 'white', border: 'none', borderRadius: 8,
+              fontSize: 13, fontWeight: 600,
+              cursor: exporting || !selectedEmployee || logs.length === 0
+                ? 'not-allowed' : 'pointer',
+              opacity: !selectedEmployee || logs.length === 0 ? 0.5 : 1,
+            }}>
+            {exporting
+              ? <div style={{
+                  width: 14, height: 14, border: '2px solid white',
+                  borderTopColor: 'transparent', borderRadius: '50%',
+                  animation: 'spin 0.8s linear infinite',
+                }} />
+              : <Download size={14} />}
+            Empleado
+          </button>
+
+          {/* Botón Exportar Todos */}
+          <button onClick={handleExportAllPdf}
+            disabled={exporting || totalElements === 0}
+            title={totalElements === 0 ? 'No hay registros para exportar' : ''}
+            style={{
+              display: 'flex', alignItems: 'center', gap: 8,
+              padding: '9px 16px', backgroundColor: '#1976d2',
+              color: 'white', border: 'none', borderRadius: 8,
+              fontSize: 13, fontWeight: 600,
+              cursor: exporting || totalElements === 0
+                ? 'not-allowed' : 'pointer',
+              opacity: totalElements === 0 ? 0.5 : 1,
+            }}>
+            {exporting
+              ? <div style={{
+                  width: 14, height: 14, border: '2px solid white',
+                  borderTopColor: 'transparent', borderRadius: '50%',
+                  animation: 'spin 0.8s linear infinite',
+                }} />
+              : <Download size={14} />}
+            Todos
+          </button>
+        </div>
       </div>
 
       {/* Filters */}
