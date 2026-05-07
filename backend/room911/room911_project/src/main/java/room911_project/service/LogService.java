@@ -90,6 +90,34 @@ public class LogService {
         }
     }
 
+    @Transactional(readOnly = true)
+    public byte[] exportAllPdf(String startDate, String endDate) {
+        try {
+            ZoneOffset tz = ZoneOffset.ofHours(-5);
+
+            // Siempre pasar fechas reales — nunca null
+            OffsetDateTime start = startDate != null
+                    ? LocalDate.parse(startDate).atStartOfDay().atOffset(tz)
+                    : DATE_MIN;
+            OffsetDateTime end = endDate != null
+                    ? LocalDate.parse(endDate).atTime(23, 59, 59).atOffset(tz)
+                    : DATE_MAX;
+
+            List<AccessLog> allLogs = accessLogRepository
+                    .findByEmployeeForPdf(null, start, end);
+            log.info("Generando PDF para todos los empleados con {} registros",
+                    allLogs.size());
+
+            return buildAllPdf(allLogs);
+
+        } catch (Exception e) {
+            log.error("Error generando PDF para todos los empleados: {}",
+                    e.getMessage(), e);
+            throw new RuntimeException(
+                    "Error al generar el PDF: " + e.getMessage(), e);
+        }
+    }
+
     private byte[] buildPdf(Employee emp, List<AccessLog> logs) throws Exception {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         Document doc = new Document(PageSize.A4.rotate(), 30, 30, 40, 30);
@@ -182,6 +210,118 @@ public class LogService {
                     "Sin registros en el período seleccionado",
                     fontSmall));
             empty.setColspan(5);
+            empty.setPadding(12);
+            empty.setHorizontalAlignment(Element.ALIGN_CENTER);
+            table.addCell(empty);
+        }
+
+        doc.add(table);
+        doc.add(Chunk.NEWLINE);
+
+        Paragraph footer = new Paragraph(
+                "Documento generado por ROOM_911 — Laboratorios XYZ · "
+                + OffsetDateTime.now(ZoneOffset.ofHours(-5)).format(FMT),
+                new Font(Font.FontFamily.HELVETICA, 8,
+                        Font.ITALIC, BaseColor.GRAY));
+        footer.setAlignment(Element.ALIGN_CENTER);
+        doc.add(footer);
+
+        doc.close();
+        writer.close();
+        return baos.toByteArray();
+    }
+
+    private byte[] buildAllPdf(List<AccessLog> allLogs) throws Exception {
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        Document doc = new Document(PageSize.A4.rotate(), 30, 30, 40, 30);
+        PdfWriter writer = PdfWriter.getInstance(doc, baos);
+        doc.open();
+
+        Font fontTitle  = new Font(Font.FontFamily.HELVETICA, 16,
+                Font.BOLD, new BaseColor(13, 71, 161));
+        Font fontSub    = new Font(Font.FontFamily.HELVETICA, 10,
+                Font.NORMAL, BaseColor.DARK_GRAY);
+        Font fontSmall  = new Font(Font.FontFamily.HELVETICA, 9,
+                Font.NORMAL, new BaseColor(84, 110, 122));
+        Font fontHeader = new Font(Font.FontFamily.HELVETICA, 10,
+                Font.BOLD, BaseColor.WHITE);
+        Font fontCell   = new Font(Font.FontFamily.HELVETICA, 9,
+                Font.NORMAL, new BaseColor(26, 29, 41));
+
+        // ── Encabezado ─────────────────────────────────────────────────────
+        doc.add(new Paragraph("ROOM_911 — Historial de Accesos (Todos los Empleados)", fontTitle));
+        doc.add(new Paragraph(
+                "Laboratorios XYZ · Área de Producción de Medicamentos",
+                fontSub));
+        doc.add(Chunk.NEWLINE);
+
+        // ── Info general ────────────────────────────────────────────────────
+        PdfPTable info = new PdfPTable(2);
+        info.setWidthPercentage(100);
+        info.setWidths(new float[]{1, 1});
+        info.setSpacingAfter(12);
+
+        addInfoCell(info, "Tipo de reporte", "Todos los empleados", fontSmall);
+        addInfoCell(info, "Total registros",
+                String.valueOf(allLogs.size()), fontSmall);
+        addInfoCell(info, "Generado",
+                OffsetDateTime.now(ZoneOffset.ofHours(-5)).format(FMT),
+                fontSmall);
+        addInfoCell(info, "", "", fontSmall);
+
+        doc.add(info);
+
+        // ── Tabla de registros ──────────────────────────────────────────────
+        PdfPTable table = new PdfPTable(6);
+        table.setWidthPercentage(100);
+        table.setWidths(new float[]{15, 18, 18, 18, 18, 18});
+
+        BaseColor headerBg = new BaseColor(13, 71, 161);
+        for (String h : new String[]{
+                "Empleado", "ID", "Fecha y Hora", "Resultado", "Notas", "Departamento"}) {
+            PdfPCell cell = new PdfPCell(new Phrase(h, fontHeader));
+            cell.setBackgroundColor(headerBg);
+            cell.setPadding(7);
+            cell.setBorderColor(headerBg);
+            table.addCell(cell);
+        }
+
+        boolean odd = false;
+        BaseColor rowAlt = new BaseColor(245, 247, 250);
+
+        for (AccessLog logEntry : allLogs) {
+            BaseColor rowBg = odd ? rowAlt : BaseColor.WHITE;
+            odd = !odd;
+
+            String empName = (logEntry.getEmployee() != null)
+                    ? logEntry.getEmployee().getFirstName() + " " + logEntry.getEmployee().getLastName()
+                    : "—";
+            
+            addTableCell(table, empName, fontCell, rowBg);
+            addTableCell(table, logEntry.getInternalIdRaw(), fontCell, rowBg);
+            addTableCell(table,
+                    logEntry.getAccessedAt() != null
+                            ? logEntry.getAccessedAt().format(FMT) : "—",
+                    fontCell, rowBg);
+            addTableCell(table,
+                    translateResult(logEntry.getResult().name()),
+                    fontCell, rowBg);
+            addTableCell(table,
+                    logEntry.getNotes() != null ? logEntry.getNotes() : "—",
+                    fontCell, rowBg);
+            addTableCell(table,
+                    (logEntry.getEmployee() != null
+                            && logEntry.getEmployee().getDepartment() != null)
+                            ? logEntry.getEmployee().getDepartment().getName()
+                            : "—",
+                    fontCell, rowBg);
+        }
+
+        if (allLogs.isEmpty()) {
+            PdfPCell empty = new PdfPCell(new Phrase(
+                    "Sin registros en el período seleccionado",
+                    fontSmall));
+            empty.setColspan(6);
             empty.setPadding(12);
             empty.setHorizontalAlignment(Element.ALIGN_CENTER);
             table.addCell(empty);

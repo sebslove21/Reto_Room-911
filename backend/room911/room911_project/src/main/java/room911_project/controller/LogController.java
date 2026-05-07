@@ -51,4 +51,16 @@ public class LogController {
                 .header("Content-Type", "application/pdf")
                 .body(pdf);
     }
+
+    @GetMapping("/export-pdf-all")
+    public ResponseEntity<byte[]> exportAllPdf(
+            @RequestParam(required = false) String startDate,
+            @RequestParam(required = false) String endDate) throws Exception {
+        byte[] pdf = logService.exportAllPdf(startDate, endDate);
+        return ResponseEntity.ok()
+                .header("Content-Disposition",
+                        "attachment; filename=historial_todos_empleados.pdf")
+                .header("Content-Type", "application/pdf")
+                .body(pdf);
+    }
 }
